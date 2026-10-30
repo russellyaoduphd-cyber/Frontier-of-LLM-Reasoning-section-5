@@ -547,108 +547,183 @@ After collection reasoning trajectories, training can be conducted by designing 
 
 \end{frame}
 
-\begin{frame}{5.3: From Single-Agent to Multi-Agent Learning}
+\begin{frame}{5.3: From One Agent to a Team}
+\small
+\textbf{Recall:} A single agent can learn from its reasoning, actions, and feedback from the environment.
 
-\textbf{Recall:} A single agent learns from its reasoning, tool calls, and environment feedback.
-
-\vspace{0.25cm}
-
-\textbf{What changes?} Multiple agents can now exchange messages and influence one another's decisions.
+\vspace{0.15cm}
+\textbf{What is new?} Agents also exchange messages and respond to one another's proposals.
+\[
+\text{Prover}\xrightarrow{\text{draft}}\text{Critic}
+\xrightarrow{\text{feedback}}\text{Prover}
+\]
 
 \begin{itemize}
-    \item \textbf{Communication (input):} What information should each agent receive?
-
-    \item \textbf{Coordination (output):} How should the agents combine their actions into a team decision?
-
-    \item \textbf{Training:} How can we learn from their joint interactions?
+    \item \textbf{Communication:} What information does each agent receive?
+    \item \textbf{Coordination:} Who should act next, and in what order?
+    \item \textbf{Training:} How can the team learn from its joint interaction?
 \end{itemize}
 
-\textbf{Example:} For a difficult proof, a Prover proposes an argument, a Critic finds a gap, and a Coordinator decides what to revise before submitting the answer.
+\textbf{Running example:} A Prover drafts a mathematical proof, a Critic checks it, and a Coordinator manages revisions.
 
-\vspace{0.2cm}
-
-\textbf{Key insight:} We still learn from trajectories, but now they contain messages and coordinated decisions, not just one model's reasoning.
+\vspace{0.15cm}
+\textbf{Key insight:} The data and model recipes remain, but a trajectory now records several agents' decisions.
 
 \end{frame}
+
 \begin{frame}{5.3.1: Designing Agent-Agent Communication}
-
-\textbf{Main question:} Who should receive what information, and when?
+\small
+\textbf{Main question:} Who needs to know what, and how does the information reach them?
 
 \vspace{0.2cm}
-
 \begin{itemize}
-    \item \textbf{Centralized communication:}
-    A central component aggregates information from multiple agents, providing a shared view (Matta et al., 2019).
+    \item \textbf{Centralized aggregation:}
+    A central component collects agents' results and maintains an overview of their progress. It can pass the relevant information back to the team.
 
+    \vspace{0.2cm}
     \item \textbf{Conditioned information sharing:}
-    Agents receive messages relevant to their own roles or goals, rather than every message from everyone.
-
-    A shared message pool (Hong et al., 2023) and intention-based sharing (Qiu et al., 2024) illustrate this idea.
+    Messages are selected according to the recipient's role, goal, or current task. Shared message pools and intention-based messages illustrate this idea.
 \end{itemize}
 
 \vspace{0.2cm}
-
-\textbf{Example:} If the Critic finds a flaw in a proposed lemma, the Prover needs the critique to revise it, while the Coordinator needs to know whether the proof is ready.
+\textbf{Example:} A Prover needs a detailed explanation of a flaw. A Coordinator may only need to know that the proof requires revision.
 
 \vspace{0.2cm}
-
-\textbf{Key insight:} Communication determines what each agent knows before deciding its next action.
+\textbf{Key insight:} Communication shapes what each agent knows before making its next decision.
 
 \end{frame}
-\begin{frame}{5.3.2: Coordinating Actions among Agents}
 
-\textbf{Main question:} After exchanging information, how can agents act as a team?
+\begin{frame}{Communication Example: Same Team, Different Information}
+\small
+\textbf{Suppose the Critic discovers a problem:}
+
+\begin{quote}
+\emph{Continuity alone does not imply uniform continuity on $\mathbb{R}$.
+For example, $f(x)=x^2$ is a counterexample.}
+\end{quote}
+
+\vspace{0.05cm}
+\begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+        \textbf{Centralized aggregation}
+        \begin{itemize}
+            \item The Critic sends its finding to the Coordinator.
+            \item The Coordinator maintains the overall view and forwards what is needed.
+        \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+        \textbf{Conditioned sharing}
+        \begin{itemize}
+            \item The Prover receives the counterexample and explanation.
+            \item The Coordinator receives a short status: \emph{Revision required.}
+        \end{itemize}
+    \end{column}
+\end{columns}
 
 \vspace{0.2cm}
+\textbf{Key distinction:} Where information is collected and which information each agent receives are different design questions.
 
+\end{frame}
+
+\begin{frame}{5.3.2: Coordinating Actions among Agents}
+\small
+\textbf{Main question:} Once the agents have exchanged information, how do they act as a team?
+
+\vspace{0.2cm}
 \begin{itemize}
     \item \textbf{Expert knowledge:}
-    Impose domain-specific constraints to avoid unproductive actions (Lau et al., 2012).
+    Use domain-specific constraints to rule out unsuitable actions and focus on useful choices.
 
+    \vspace{0.15cm}
     \item \textbf{Graph-based coordination:}
-    Represent dependencies between agents' tasks.
+    Represent dependencies between agents' actions. GCS specifies an order with a directed acyclic graph; DICG learns useful coordination structures.
 
-    GCS uses a directed acyclic graph to specify an execution order (Ruan et al., 2022); DICG learns coordination structures (Li et al., 2020).
-
+    \vspace{0.15cm}
     \item \textbf{Hierarchical coordination:}
-    Separate high-level strategy from lower-level execution (HAVEN; Xu et al., 2023).
+    Separate high-level strategy from lower-level execution, as in HAVEN.
 \end{itemize}
 
 \vspace{0.2cm}
+\textbf{Example:} After the Critic finds an error, the Prover must revise the argument before the final answer is assembled.
 
-\textbf{Example:} If the Critic identifies a missing argument, the team should revise that step before assembling the final proof.
-
-\vspace{0.2cm}
-
-\textbf{Key distinction:} Communication manages information flow; coordination organizes joint actions.
+\vspace{0.15cm}
+\textbf{Key distinction:} Communication delivers information; coordination determines how the team acts on it.
 
 \end{frame}
-\begin{frame}{5.3.3: Learning from Multi-Agent Trajectories}
 
-\textbf{Main question:} How can a team learn from its previous interactions?
+\begin{frame}{Coordination Example: Why Does Order Matter?}
+\small
+\textbf{Situation:} The Critic has found a counterexample. What should the team do next?
 
-\vspace{0.2cm}
+\[
+\boxed{\text{Draft}}
+\ \longrightarrow\ 
+\boxed{\text{Check}}
+\ \longrightarrow\ 
+\boxed{\text{Revise}}
+\ \longrightarrow\ 
+\boxed{\text{Submit}}
+\]
+
+\vspace{0.1cm}
+The three approaches in Section 5.3.2 address this problem differently:
 
 \begin{itemize}
-    \item \textbf{Collect:}
-    Record agents' messages, proposed solutions, revisions, and final outcomes as joint trajectories.
-
-    \item \textbf{Imitation learning:}
-    Fine-tune on useful interaction trajectories.
-
-    DEBATUNE generates training examples through multi-round debates between opposing agents (Li et al., 2024c).
-
-    \item \textbf{Feedback-driven training:}
-    Acc-Debate alternates the training of an Actor (generating answers) and a Critic (refining them), using partial trajectory rewards (Estornell et al., 2024).
+    \item \textbf{Expert constraint:} Never submit a proof while an identified error remains unresolved.
+    \item \textbf{Graph-based:} Make revision depend on critique, and make final submission depend on revision.
+    \item \textbf{Hierarchical:} A high-level decision selects \emph{revise}; the Prover executes that instruction.
 \end{itemize}
 
 \vspace{0.2cm}
-
-\textbf{Example:} Keep a productive debate where one agent spots a gap and another repairs the proof; use that interaction to improve future collaboration.
-
-\vspace{0.2cm}
-
-\textbf{Key challenge:} A correct final answer is a team outcome, but not every agent or message contributed equally.
+\textbf{Key insight:} Even if everyone knows about the mistake, the team can still fail if its actions are not coordinated.
 
 \end{frame}
+
+\begin{frame}{5.3.3: Learning from Multi-Agent Trajectories}
+\small
+\textbf{Main question:} How can messages, critiques, and revisions become training signals?
+
+\vspace{0.2cm}
+\begin{itemize}
+    \item \textbf{Collect the joint trajectory:}
+    Record the agents' proposals, messages, revisions, and final result, rather than only the final answer.
+
+    \vspace{0.15cm}
+    \item \textbf{Imitation learning (DEBATUNE):}
+    Generate multi-round debates between opposing stances, then fine-tune on debate-generated training data.
+
+    \vspace{0.15cm}
+    \item \textbf{Feedback-driven learning (Acc-Debate):}
+    An Actor generates answers and a Critic refines them. Their training alternates, using partial-trajectory rewards to evaluate intermediate progress.
+\end{itemize}
+
+\vspace{0.2cm}
+\textbf{Key challenge:} The team may succeed, but its final reward does not tell us which message or agent made the decisive contribution.
+
+\end{frame}
+
+\begin{frame}{Worked Example: From Debate to Training Data}
+\small
+\textbf{Question:} Is every continuous function on $\mathbb{R}$ uniformly continuous?
+
+\vspace{0.1cm}
+\begin{enumerate}
+    \item \textbf{Agent A proposes:} \emph{Yes, because the function is continuous.}
+    \item \textbf{Agent B challenges:} \emph{No. $f(x)=x^2$ is a counterexample.}
+    \item \textbf{Agent A revises:} \emph{The statement is false on $\mathbb{R}$. Continuity on a compact domain would be sufficient.}
+    \item \textbf{Final answer:} \emph{No}, with the counterexample.
+\end{enumerate}
+
+\vspace{0.15cm}
+\textbf{How can we learn from this interaction?}
+\begin{itemize}
+    \item \textbf{Imitation:} Use selected productive exchanges and corrected reasoning as training demonstrations.
+    \item \textbf{Feedback:} Evaluate intermediate proposals and revisions, not just the final answer, to improve the agents' behavior.
+\end{itemize}
+
+\vspace{0.15cm}
+\textbf{Key insight:} The useful learning signal can lie in how agents challenge and repair a solution, not only in whether the team gets it right.
+
+\end{frame}
+
 \end{document}
