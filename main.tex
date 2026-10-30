@@ -462,6 +462,30 @@ After collection reasoning trajectories, training can be conducted by designing 
 \textbf{Key insight:} Interaction is not merely a way to solve problems; it is also a way to collect better training data.
 
 \end{frame}
+\begin{frame}{5.2.1: Search with Verifiers -- MCTS and PPM}
+\small
+\textbf{Motivation:} For difficult problems, unguided sampling may rarely produce successful reasoning trajectories.
+
+\vspace{0.2cm}
+\begin{itemize}
+    \item \textbf{Monte Carlo Tree Search (MCTS):}
+    Represent partial reasoning paths as a search tree. Explore alternative next steps and spend more search effort on promising branches.
+
+    \vspace{0.15cm}
+    \item \textbf{Process Preference Model (PPM):}
+    Estimate the downstream value of an intermediate reasoning step (approximately its Q-value). The estimate can guide which branch to explore next.
+\end{itemize}
+
+\vspace{0.2cm}
+\textbf{Example:} For a difficult proof, the model may try induction or contradiction. Search compares both routes instead of committing to the first one.
+
+\vspace{0.15cm}
+\textbf{Key insight:} Guided search can discover better trajectories that later provide training signals.
+
+{\scriptsize \textit{Examples:} MCTS with value/ORM (Wan et al., 2024c); MCTS with PPM (Guan et al., 2025).}
+
+\end{frame}
+
 \begin{frame}{Single-agent Systems: Agent Training}
 
 \textbf{Core idea:} Turn collected interaction trajectories and environmental feedback into learning signals.
@@ -494,6 +518,35 @@ After collection reasoning trajectories, training can be conducted by designing 
 \textbf{Key insight:} We are not only training the model to produce better answers, but also to make better decisions during interaction.
 
 \end{frame}
+\begin{frame}{5.2.2: Learning with a Refiner}
+\small
+\textbf{Motivation:} Hard problems may produce almost no successful trajectories. Must we discard every failure?
+
+\vspace{0.2cm}
+\textbf{Core idea:} Learn to improve an imperfect solution using feedback.
+
+\[
+\text{Initial solution}
+\xrightarrow{\text{Critique / feedback}}
+\text{Revised solution}
+\]
+
+\begin{enumerate}
+    \item \textbf{Generate:} An agent produces an initial reasoning trajectory.
+    \item \textbf{Evaluate:} A critic or external environment identifies a problem.
+    \item \textbf{Refine and learn:} Train a refiner to correct the output; successful revisions can also support further training.
+\end{enumerate}
+
+\vspace{0.15cm}
+\textbf{Example:} Code fails a unit test. A refiner uses the error message to locate the bug and revise the code.
+
+\vspace{0.15cm}
+\textbf{Key insight:} Failed trajectories can become opportunities to learn correction, rather than merely being rejected.
+
+{\scriptsize \textit{Caution:} Unreliable feedback may cause over-refinement, even changing correct answers into wrong ones.}
+
+\end{frame}
+
 \begin{frame}{5.3: From Single-Agent to Multi-Agent Learning}
 
 \textbf{Recall:} A single agent learns from its reasoning, tool calls, and environment feedback.
